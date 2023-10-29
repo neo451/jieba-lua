@@ -1,17 +1,24 @@
+-- 字典存哪里的问题，在哪个文件夹下面有txt才能读，目前，目前在home下面
+-- 中文regex问题,标点，也许就过滤标点就好了，反向解决，再读读源码
+-- HMM问题
+-- maybe 最终都改成迭代器, (更高效？）
+-- 有些地方可以用尾递归优化
+-- -- 学习动态规划到底是啥
 local M = {}
 local st = require "stringtools"
+local utf8 = require 'lua-utf8'
 
--- 精准模式正则
-local re_han_default = "" -- 汉字码、非空白字符
-local re_skip_default = "" --换行或空白
-
--- 全局模式的正则
-local re_han_cut_all = "" -- 全局模式 只包含汉字
-local re_skip_cut_all = "" -- 字母数字+#
-
--- maybe 最终都改成迭代器
+  local p = '[%z\1-\127\194-\244][\128-\191]*'
+local pat_punc = "[^，。？！；/（）【】]"
 
 
+local function is_punctuation(char)
+  if utf8.match(char, pat_punc)~= nil then
+    return true
+  else
+    return false
+  end
+end
 
 local gen_pfdict = function ()
   local f = io.open("dict.txt", "r")
@@ -33,32 +40,35 @@ local gen_pfdict = function ()
 end
 
 local Freq,Total = gen_pfdict()
+local logtotal = math.log(Total) -- 17.9
 
 local get_DAG = function(sentence)
   local DAG = {}
+  local tmplist = {}
   local N = st.len(sentence)
+  local frag = ''
   for k = 1, N do
-    local tmplist = {}
     local i = k
-    local frag = st.sub(sentence,k,k)
+    frag = st.sub(sentence,k,k)
     while i <= N and st.keyInTable(Freq, frag) do
-      table.insert(tmplist, i)
+      tmplist[#tmplist+1] = i
       i = i + 1
       frag = st.sub(sentence,k,i)
     end
     if #tmplist == 0 then
-      table.insert(tmplist, k)
+      tmplist[#tmplist+1] = k
     end
     DAG[k] = tmplist
+    tmplist = {}
   end
   return DAG
 end
+
 
 local calc = function (sentence, DAG)
   local N = st.len(sentence)
   local route = {}
   route[N+1] = {0,0}
-  local logtotal = math.log(Total) -- 17.9
   for i = N, 1, -1 do
     local tmp_list = {}
     for _, x in ipairs(DAG[i]) do
@@ -80,13 +90,13 @@ local cut_all = function (sentence)
   for k,v in ipairs(DAG) do
     if #v == 1 and k > old_j then
       local res = st.sub(sentence,k,v[1])
-      table.insert(result, res)
+      result[#result+1] = res
       old_j = v[1]
     else
       for _,j in ipairs(v) do
         if j > k then
           local res2 = st.sub(sentence,k,j)
-          table.insert(result, res2)
+          result[#result+1] = res2
           old_j = j
         end
       end
@@ -110,7 +120,7 @@ local cut_DAG_NO_HMM = function (sentence)
       x = y + 1
     else
       if st.len(buf) > 0 then
-        table.insert(result,buf)
+        result[#result+1] = buf
         buf = ''
       end
       table.insert(result,l_word)
@@ -118,51 +128,39 @@ local cut_DAG_NO_HMM = function (sentence)
     end
   end
   if st.len(buf) > 0 then
-    table.insert(result, buf)
+    result[#result+1] = buf
     buf = ''
     x = x + 1
   end
   return result
 end
 
-local isSep = function (w)
-  if w == "，" then
-    return true
-end
+local cut_DAG = function ()
 end
 
-M.cut = function (sentence, ifcut_all, ifHMM)
-  -- ifcut_all = false
-  -- ifHMM = false
-  -- local cut_block = {}
-  -- if ifcut_all then
-  --   cut_block = cut_all()
-  -- elseif ifHMM then
-  --   -- cut_block = cut_DAG()
-  -- else
-  --   cut_block = cut_DAG_NO_HMM()
-  -- end
+
+M.cut = function (sentence, all, HMM)
   local yieldval = {}
-  local blocks = {}
-  local p = '[%z\1-\127\194-\244][\128-\191]*'
   local tmp = ""
+  local cutfunc
+
+  if all then
+    cutfunc = cut_all
+  elseif HMM then
+    cutfunc = cut_DAG
+      else
+    cutfunc = cut_DAG_NO_HMM
+  end
+  return cutfunc(sentence)
   -- 暂时先放一个sep在后面
-  sentence = sentence .. "，"
-  for w in string.gmatch(sentence,p) do
-    if not isSep(w) then
-      tmp = tmp .. w
-    else
-      table.insert(blocks, tmp)
-      tmp = ""
-    end
-  end
-  for _,v in ipairs(blocks) do
-    local tmplist = cut_DAG_NO_HMM(v)
-    for _,w in ipairs(tmplist) do
-      table.insert(yieldval, w)
-    end
-  end
-  return yieldval
+  -- sentence = sentence .. "，"
+  -- local blocks = split_punctuation(sentence)
+  -- for _,v in ipairs(blocks) do
+  --   local tmplist = cut_DAG_NO_HMM(v)
+  --   for _,w in ipairs(tmplist) do
+  --     table.insert(yieldval, w)
+  --   end
+  -- end
 end
 
 return M
