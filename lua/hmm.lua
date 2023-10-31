@@ -1,14 +1,72 @@
 local MIN_FLOAT = -3.14e100
-local start_p = require ('prob_start') 
-local emit_p = require ('prob_emit')
-local trans_p = require ('prob_trans')
+local st = require("stringtools")
+-- local start_p = require ('prob_start') 
+-- local emit_p = require ('prob_emit')
+-- local trans_p = require ('prob_trans')
 
-local states = {'x','y','z'} --替换为你的实际状态
-local obs = {'a','b','c','d'} --替换为你的实际观察序列
+local start = {
+  ['B'] = -0.6,
+  ['M'] = -1.2,
+  ['E'] = -1.0,
+  ['S'] = -0.5
+}
 
 
+local emit = {
+  ['B'] = {
+    ['韩'] = -0.1, -- 假设比较高的概率
+    ['冰'] = -3.0,
+    ['是'] = -3.0,
+    ['个'] = -3.0
+  },
+  ['M'] = {
+    ['韩'] = -3.0,
+    ['冰'] = -3.0,
+    ['是'] = -3.0,
+    ['个'] = -3.0
+  },
+  ['E'] = {
+    ['韩'] = -3.0,
+    ['冰'] = -0.1, -- 假设比较高的概率
+    ['是'] = -3.0,
+    ['个'] = -3.0 
+  },
+  ['S'] = {
+    ['韩'] = -3.0,
+    ['冰'] = -3.0,
+    ['是'] = -0.1, -- 假设比较高的概率
+    ['个'] = -0.1  -- 假设比较高的概率
+  },
+}
 
-function viterbi(obs, states, start_p, trans_p, emit_p)
+local trans = {
+  ['B'] = {
+    ['B'] = -1.2,
+    ['M'] = -0.4,
+    ['E'] = -0.6,
+    ['S'] = -1.0
+  },
+  ['M'] = {
+    ['B'] = -1.2,
+    ['M'] = -0.4,
+    ['E'] = -0.6,
+    ['S'] = -1.0
+  },
+  ['E'] = {
+    ['B'] = -0.6,
+    ['M'] = -1.2,
+    ['E'] = -1.0,
+    ['S'] = -0.4
+  },
+  ['S'] = {
+    ['B'] = -0.6,
+    ['M'] = -1.2,
+    ['E'] = -1.0,
+    ['S'] = -0.4
+  }
+}
+
+local function viterbi(obs, states, start_p, trans_p, emit_p)
     local V = {{}}  -- tabular
     local path = {}
     for _, y in pairs(states) do  -- init
@@ -53,12 +111,48 @@ function viterbi(obs, states, start_p, trans_p, emit_p)
     return prob, path[state]
 end
 
+local function cut(sentence, start_p, trans_p, emit_p)
+  local prob, pos_list = viterbi(sentence, {'B', 'M', 'E', 'S'}, start_p, trans_p, emit_p)
+  local result = {}
+  local begin, nexti = 1, 1
+  local sentence_length = #sentence
+  for i = 1, sentence_length do
+    local char = sentence[i]
+    -- print(char)
+    local pos = pos_list[i]
+    if pos == 'B' then
+      begin = i
+    elseif pos == 'E' then
+      local res = {}
+      for _,v in pairs({unpack(sentence, begin, i)}) do
+        table.insert(res, v)
+      end
+      local val = table.concat(res)
+      table.insert(result, val)
+      nexti = i + 1
+    elseif pos == 'S' then
+      result[#result+1] = char
+      nexti = i + 1
+    end
+  end
 
-local prob, path = viterbi(obs, states, start_p, trans_p, emit_p)
+  if nexti <= sentence_length then
+    table.insert(result, sentence[nexti])
+  end
 
--- 输出最大概率和对应的状态路径
-print(prob)
-print(unpack(path)) 
+  return result
+end
 
+local sentence = "韩冰是个"
+local res = {}
 
+for i in string.gmatch(sentence, "[%z\1-\127\194-\244][\128-\191]*") do
+  table.insert(res, i)
+end
 
+-- 调用切分函数
+local result = cut(res, start, trans, emit)
+
+-- 以空格分隔的字符串形式输出切分结果
+local segmented_sentence = table.concat(result, "｜")
+print(segmented_sentence)
