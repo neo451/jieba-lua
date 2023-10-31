@@ -1,71 +1,12 @@
+local M = {}
 local MIN_FLOAT = -3.14e100
-local st = require("stringtools")
--- local start_p = require ('prob_start') 
--- local emit_p = require ('prob_emit')
--- local trans_p = require ('prob_trans')
+local start = require ('prob_start')
+local emit = require ('prob_emit')
+local trans = require ('prob_trans')
+local ut = require ('utils')
 
-local start = {
-  ['B'] = -0.6,
-  ['M'] = -1.2,
-  ['E'] = -1.0,
-  ['S'] = -0.5
-}
-
-
-local emit = {
-  ['B'] = {
-    ['韩'] = -0.1, -- 假设比较高的概率
-    ['冰'] = -3.0,
-    ['是'] = -3.0,
-    ['个'] = -3.0
-  },
-  ['M'] = {
-    ['韩'] = -3.0,
-    ['冰'] = -3.0,
-    ['是'] = -3.0,
-    ['个'] = -3.0
-  },
-  ['E'] = {
-    ['韩'] = -3.0,
-    ['冰'] = -0.1, -- 假设比较高的概率
-    ['是'] = -3.0,
-    ['个'] = -3.0 
-  },
-  ['S'] = {
-    ['韩'] = -3.0,
-    ['冰'] = -3.0,
-    ['是'] = -0.1, -- 假设比较高的概率
-    ['个'] = -0.1  -- 假设比较高的概率
-  },
-}
-
-local trans = {
-  ['B'] = {
-    ['B'] = -1.2,
-    ['M'] = -0.4,
-    ['E'] = -0.6,
-    ['S'] = -1.0
-  },
-  ['M'] = {
-    ['B'] = -1.2,
-    ['M'] = -0.4,
-    ['E'] = -0.6,
-    ['S'] = -1.0
-  },
-  ['E'] = {
-    ['B'] = -0.6,
-    ['M'] = -1.2,
-    ['E'] = -1.0,
-    ['S'] = -0.4
-  },
-  ['S'] = {
-    ['B'] = -0.6,
-    ['M'] = -1.2,
-    ['E'] = -1.0,
-    ['S'] = -0.4
-  }
-}
-
+-- 潜在问题，如果没见过的词怎么办 麓
+-- 问题，标点抓瞎
 local function viterbi(obs, states, start_p, trans_p, emit_p)
     local V = {{}}  -- tabular
     local path = {}
@@ -112,47 +53,100 @@ local function viterbi(obs, states, start_p, trans_p, emit_p)
 end
 
 local function cut(sentence, start_p, trans_p, emit_p)
-  local prob, pos_list = viterbi(sentence, {'B', 'M', 'E', 'S'}, start_p, trans_p, emit_p)
+  local s_res = {}
+  -- 可不可以直接返回表
+  for i in string.gmatch(sentence, "[%z\1-\127\194-\244][\128-\191]*") do
+    table.insert(s_res, i)
+  end
+  local prob, pos_list = viterbi(s_res, {'B', 'M', 'E', 'S'}, start_p, trans_p, emit_p)
   local result = {}
   local begin, nexti = 1, 1
-  local sentence_length = #sentence
+  local sentence_length = #s_res
   for i = 1, sentence_length do
-    local char = sentence[i]
-    -- print(char)
+    local char = s_res[i]
     local pos = pos_list[i]
     if pos == 'B' then
       begin = i
     elseif pos == 'E' then
       local res = {}
-      for _,v in pairs({unpack(sentence, begin, i)}) do
+      for _,v in pairs({unpack(s_res, begin, i)}) do
         table.insert(res, v)
       end
       local val = table.concat(res)
+      coroutine.yield(val)
       table.insert(result, val)
       nexti = i + 1
     elseif pos == 'S' then
+      coroutine.yield(char)
       result[#result+1] = char
       nexti = i + 1
     end
   end
 
   if nexti <= sentence_length then
-    table.insert(result, sentence[nexti])
+    table.insert(result, s_res[nexti])
+    coroutine.yield(s_res[nexti])
   end
 
   return result
 end
 
-local sentence = "韩冰是个"
-local res = {}
-
-for i in string.gmatch(sentence, "[%z\1-\127\194-\244][\128-\191]*") do
-  table.insert(res, i)
+M.cut = function(sentence)
+  local co = coroutine.create(function () cut(sentence, start, trans, emit) end)
+  return function ()
+    local _, res = coroutine.resume(co)
+    return res
+  end
 end
 
--- 调用切分函数
-local result = cut(res, start, trans, emit)
+M.lcut = function(sentence)
+  local res = {}
+  for i in M.cut(sentence) do
+    table.insert(res, i)
+  end
+  return res
+end
 
--- 以空格分隔的字符串形式输出切分结果
-local segmented_sentence = table.concat(result, "｜")
-print(segmented_sentence)
+-- local Force_Split_Words = {}
+-- function contains(table, val)
+--    for _, value in ipairs(table) do
+--       if value == val then
+--          return true
+--       end
+--    end
+--    return false
+-- end
+--
+-- buggyyyyy final pieceeeeee!!!!!
+-- function cut(sentence)
+--     local blocks = ut.split_punctuation(sentence)
+--     local result = {}
+--     for _, blk in ipairs(blocks) do
+--       print(ut.is_punctuation(blk))
+--         if ut.is_punctuation(blk) then
+--             for _, word in ipairs(M.lcut(blk)) do
+--                 if not contains(Force_Split_Words, word) then
+--                     table.insert(result, word)
+--                 else
+--                     for i = 1, #word do
+--                         table.insert(result, ut.sub(word, i, i))
+--                     end
+--                 end
+--             end
+--         else
+--             local tmp = ut.split_punctuation(blk)
+--             for _, x in ipairs(tmp) do
+--                 if x ~= "" then
+--                     table.insert(result, x)
+--                 end
+--             end
+--         end
+--         print(blk)
+--     end
+--
+--     return result
+-- end
+
+cut("，安门")
+
+return M

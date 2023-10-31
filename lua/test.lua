@@ -1,8 +1,6 @@
 -- local jieba = require("jieba")
 -- local profile = require("profile")
 
-
-
 function read_file_lines(file_path)
     local lines = {}
     local file = io.open(file_path, "r")
@@ -13,7 +11,8 @@ function read_file_lines(file_path)
     end
 
     for line in file:lines() do
-        table.insert(lines, line)
+      print(line)
+      table.insert(lines, line)
     end
     
     file:close()
@@ -28,12 +27,12 @@ local test = "为了深入展现新时代“海上新广东”故事，更好地
 
 -- profile.start()
 local n = os.clock()
-for _,v in pairs(test_text) do
-  print(v)
+-- for _,v in pairs(test_text) do
+--   print(v)
   -- for i in jieba.cut(v,true) do
   --     io.write(i.."/")
   -- end
-end
+-- end
 -- print(os.clock()-n)
 -- profile.stop()
 
