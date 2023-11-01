@@ -136,8 +136,7 @@ local function iter_cut_hmm(sentence)
     local x = 1
     local N = ut.len(sentence)
     local buf = ''
-    ut.print(route)
-    while x <= N+1 do
+    while x <= N do
         local y = route[x][2]
         local l_word = ut.sub(sentence, x, y)
         if y == x then
@@ -145,14 +144,14 @@ local function iter_cut_hmm(sentence)
         else
             if buf ~= "" then
                 if ut.len(buf) == 1 then --应该是数字之类
-                  print("1",buf)
+                  -- print("1",buf)
                     coroutine.yield(buf)
                     buf = ""
                 elseif not Freq[buf] then
-                    local recognized = hmm.lcut(buf)
+                    local recognized = hmm.cut(buf)
                     for _, t in ipairs(recognized) do
                       coroutine.yield(t)
-                      print("2",t)
+                      -- print("2",t)
                     end
                 else
                     for i = 1, ut.len(buf) do
@@ -169,22 +168,19 @@ local function iter_cut_hmm(sentence)
     end
 
     if buf ~= "" then
-      -- print(ut.len(buf))
-      -- print(ut.sub(buf,2,2))
-      print(Freq[ut.sub(buf,1,1)])
-        -- if ut.len(buf) == 1 then
-        --   coroutine.yield(buf)
-        -- elseif not Freq[buf] then
-        --     local recognized = hmm.lcut(buf)
-        --     for _, t in ipairs(recognized) do
-        --       coroutine.yield(t)
-        --     end
-        -- else
-        --     for i = 1, ut.len(buf) do
-        --         local elem = ut.sub(buf, i, i)
-        --         coroutine.yield(elem)
-        --     end
-        -- end
+        if ut.len(buf) == 1 then
+          coroutine.yield(buf)
+        elseif not Freq[buf] then
+            local recognized = hmm.cut(buf)
+            for _, t in ipairs(recognized) do
+              coroutine.yield(t)
+            end
+        else
+            for i = 1, ut.len(buf) do
+                local elem = ut.sub(buf, i, i)
+                coroutine.yield(elem)
+            end
+        end
     end
 end
 
@@ -198,12 +194,6 @@ end
 
 local function cut_all(sentence)
   return coroutine.wrap(function () iter_cut_all(sentence) end)
-end
-
--- ut.print(get_DAG("你好，"))
-
-for i in cut_hmm("你好，你") do
-  print(i)
 end
 
 local _cut = function (sentence, all, HMM)
@@ -231,9 +221,5 @@ M.cut = function(sentence,all,HMM)
     return res
   end
 end
-
--- for i in M.cut("王可是个小柴",false,true) do
---   print(i)
--- end
 
 return M

@@ -95,29 +95,79 @@ M.keyInTable = function (table,key)
   return false
 end
 
-M.is_punctuation = function (char)
-  if utf8.match(char, pat_punc)~= nil then
-    return true
-  else
-    return false
-  end
+-- M.is_punctuation = function (char)
+--   if utf8.match(char, pat_punc)~= nil then
+--     return true
+--   else
+--     return false
+--   end
+-- end
+--
+-- M.split_punctuation = function(sentence)
+--   local blocks = {}
+--   local buf = ''
+--   for i = 1, M.len(sentence) do
+--     local char = M.sub(sentence,i,i)
+--     if M.is_punctuation(char) then
+--       blocks[#blocks+1] = buf..char
+--       buf = ''
+--     else buf = buf .. char
+--     end
+--   end
+--   if M.len(buf) > 0 then
+--     blocks[#blocks+1] = buf
+--   end
+--   return blocks
+-- end
+
+function M.isChineseCharacter(c)
+    local code = utf8.codepoint(c)
+    return code >= 0x4E00 and code <= 0x9FA5
 end
 
-M.split_punctuation = function(sentence)
-  local blocks = {}
-  local buf = ''
-  for i = 1, M.len(sentence) do
-    local char = M.sub(sentence,i,i)
-    if M.is_punctuation(char) then
-      blocks[#blocks+1] = buf..char
-      buf = ''
-    else buf = buf .. char
+function M.isAllChinese(sentence)
+  local tmp = true
+   for i in string.gmatch(sentence, "[%z\1-\127\194-\244][\128-\191]*") do
+    if not M.isChineseCharacter(i) then
+      tmp = tmp and false
+    else 
+      tmp = tmp and true
     end
   end
-  if M.len(buf) > 0 then
-    blocks[#blocks+1] = buf
-  end
-  return blocks
+  return tmp
+end
+
+-- 不一定全
+function M.is_punctuation(c)
+    local code = utf8.codepoint(c)
+    -- 全角标点符号的 Unicode 范围为：0x3000-0x303F, 0xFF00-0xFFFF
+    return (code >= 0x3000 and code <= 0x303F) or (code >= 0xFF00 and code <= 0xFFFF)
+end
+
+
+function M.split_punctuation(text)
+    local result = {}
+    local len = utf8.len(text)
+    local startPos = 1
+    for i = 1, len do
+        local c = utf8.sub(text, i, i)
+        if M.is_punctuation(c) then
+            -- 若遇到全角标点，将前面的子字符串以及标点符号本身添加到结果中，
+            -- 然后更新 start 位置
+            if i - startPos > 1 then
+                table.insert(result, utf8.sub(text, startPos, i - 1))
+            end
+            table.insert(result, c)
+            startPos = i + 1
+        end
+    end
+
+    -- 将最后一个子字符串添加到结果中
+    if startPos <= len then
+        table.insert(result, utf8.sub(text, startPos))
+    end
+
+    return result
 end
 
 return M

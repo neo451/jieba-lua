@@ -5,27 +5,36 @@ local emit = require ('prob_emit')
 local trans = require ('prob_trans')
 local ut = require ('utils')
 
--- 潜在问题，如果没见过的词怎么办 麓
--- 问题，标点抓瞎
+-- 算法实现细节有待更正，功能没问题了
+-- add forcesplit later
+
+local PrevStatus = {
+    ['B']= {'E','S'},
+    ['M']= {'M','B'},
+    ['S']= {'S','E'},
+    ['E']= {'B','M'}
+}
 local function viterbi(obs, states, start_p, trans_p, emit_p)
+
     local V = {{}}  -- tabular
     local path = {}
     for _, y in pairs(states) do  -- init
-        V[1][y] = start_p[y] + emit_p[y][obs[1]] or MIN_FLOAT
+        V[1][y] = start_p[y] + (emit_p[y][obs[1]] or MIN_FLOAT)
         path[y] = {y}
     end
     for t = 2, #obs do
         V[t] = {}
         local newpath = {}
         for _, y in pairs(states) do
-            local em_p = emit_p[y][obs[t]] or MIN_FLOAT
+            local em_p = (emit_p[y][obs[t]] or MIN_FLOAT)
             local prob, state = nil, nil
             local max_prob = MIN_FLOAT
-            for _, y0 in pairs(states) do
-                local prob0 = V[t - 1][y0] + (trans_p[y0][y] or MIN_FLOAT) + em_p
+            for _, y0 in pairs(PrevStatus[y]) do
+              local tr_p =  trans_p[y0][y] or MIN_FLOAT
+              local prob0 = V[t - 1][y0] + tr_p + em_p
+                state = y0
                 if prob0 > max_prob then
                     max_prob = prob0
-                    state = y0
                 end
             end
             prob = max_prob
@@ -52,6 +61,8 @@ local function viterbi(obs, states, start_p, trans_p, emit_p)
     return prob, path[state]
 end
 
+-- prob, path = viterbi({"韩","冰"，"是","个"}, {'B', 'M', 'E', 'S'}, start, trans, emit)
+-- print(prob)
 local function cut(sentence, start_p, trans_p, emit_p)
   local s_res = {}
   -- 可不可以直接返回表
@@ -91,7 +102,7 @@ local function cut(sentence, start_p, trans_p, emit_p)
   return result
 end
 
-M.cut = function(sentence)
+local _cut = function(sentence)
   local co = coroutine.create(function () cut(sentence, start, trans, emit) end)
   return function ()
     local _, res = coroutine.resume(co)
@@ -99,9 +110,10 @@ M.cut = function(sentence)
   end
 end
 
+
 M.lcut = function(sentence)
   local res = {}
-  for i in M.cut(sentence) do
+  for i in _cut(sentence) do
     table.insert(res, i)
   end
   return res
@@ -116,37 +128,20 @@ end
 --    end
 --    return false
 -- end
---
--- buggyyyyy final pieceeeeee!!!!!
--- function cut(sentence)
---     local blocks = ut.split_punctuation(sentence)
---     local result = {}
---     for _, blk in ipairs(blocks) do
---       print(ut.is_punctuation(blk))
---         if ut.is_punctuation(blk) then
---             for _, word in ipairs(M.lcut(blk)) do
---                 if not contains(Force_Split_Words, word) then
---                     table.insert(result, word)
---                 else
---                     for i = 1, #word do
---                         table.insert(result, ut.sub(word, i, i))
---                     end
---                 end
---             end
---         else
---             local tmp = ut.split_punctuation(blk)
---             for _, x in ipairs(tmp) do
---                 if x ~= "" then
---                     table.insert(result, x)
---                 end
---             end
---         end
---         print(blk)
---     end
---
---     return result
--- end
-
-cut("，安门")
+function M.cut(sentence)
+    local blocks = ut.split_punctuation(sentence)
+    local result = {}
+    for _, blk in ipairs(blocks) do
+      -- 
+        if ut.isAllChinese(blk) then
+            for _, word in ipairs(M.lcut(blk)) do
+              result[#result+1] = word
+            end
+        else
+          result[#result+1] = blk
+        end
+    end
+    return result
+end
 
 return M
