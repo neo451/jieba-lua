@@ -3,6 +3,10 @@
         "/home/n451/.local/share/nvim/lazy/neodev.nvim/types/nightly",
         "/usr/share/nvim/runtime/lua",
         "/home/n451/jieba-lua/lua",
-        "${3rd}/luv/library"
+        "${3rd}/luv/library",
+        "${3rd}/lfs/library"
+    ],
+    "diagnostics.globals": [
+        "lfs"
     ]
 }

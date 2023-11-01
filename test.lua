@@ -1,13 +1,6 @@
-function fib(n, a, b)
-    if n == 0 then
-     coroutine.yield(a) 
-    else
-        return fib(n - 1, b, a + b)
-    end
-end
+local jieba = require("jieba")
 
-function fibonacci(n)
-    return coroutine.wrap(function() return fib(n, 0, 1) end)
-end
 
-print(fibonacci(1000)())
+for i in jieba.cut("韩冰是个",false,true) do
+    print(i)
+end
