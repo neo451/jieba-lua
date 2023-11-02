@@ -3,9 +3,9 @@ local MIN_FLOAT = -3.14e100
 local start = require("prob_start")
 local emit = require("prob_emit")
 local trans = require("prob_trans")
-local ut = require("utils")
-local utf8 = require("lua-utf8")
--- add forcesplit later
+local ut = require("jb_utils")
+
+-- add forcesplit
 
 local PrevStatus = {
 	["B"] = { "E", "S" },
