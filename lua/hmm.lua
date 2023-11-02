@@ -4,7 +4,7 @@ local start = require("prob_start")
 local emit = require("prob_emit")
 local trans = require("prob_trans")
 local ut = require("utils")
-
+local utf8 = require("lua-utf8")
 -- add forcesplit later
 
 local PrevStatus = {
@@ -13,6 +13,7 @@ local PrevStatus = {
 	["S"] = { "S", "E" },
 	["E"] = { "B", "M" },
 }
+
 local function viterbi(obs, states, start_p, trans_p, emit_p)
 	local V = { {} } -- tabular
 	local path = {}
@@ -46,7 +47,7 @@ local function viterbi(obs, states, start_p, trans_p, emit_p)
 		path = newpath
 	end
 
-	local prob, state = nil, nil
+	local prob, state = nil, "E"
 	local max_prob = MIN_FLOAT
 	for _, y in pairs({ "E", "S" }) do
 		if V[#obs][y] > max_prob then
@@ -89,12 +90,10 @@ local function cut(sentence, start_p, trans_p, emit_p)
 			nexti = i + 1
 		end
 	end
-
 	if nexti <= sentence_length then
 		table.insert(result, s_res[nexti])
 		coroutine.yield(s_res[nexti])
 	end
-
 	return result
 end
 
@@ -125,17 +124,19 @@ end
 --    end
 --    return false
 -- end
+
 function M.cut(sentence)
-	local blocks = ut.split_punctuation(sentence)
+	local blocks = ut.splitWithSimilarCharacters(sentence)
 	local result = {}
 	for _, blk in ipairs(blocks) do
-		--
 		if ut.isAllChinese(blk) then
 			for _, word in ipairs(M.lcut(blk)) do
 				result[#result + 1] = word
 			end
 		else
-			result[#result + 1] = blk
+			for _, word in ipairs(ut.splitString(blk)) do
+				result[#result + 1] = word
+			end
 		end
 	end
 	return result

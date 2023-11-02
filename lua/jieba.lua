@@ -216,7 +216,7 @@ local _cut = function(sentence, all, HMM)
 	else
 		cutfunc = cut_no_hmm
 	end
-	local blocks = ut.split_punctuation(sentence)
+	local blocks = ut.splitWithSimilarCharacters(sentence)
 	for _, v in ipairs(blocks) do
 		for i in cutfunc(v) do
 			coroutine.yield(i)
@@ -234,6 +234,7 @@ M.cut = function(sentence, all, HMM)
 	end
 end
 
+
 M.lcut = function(sentence, all, HMM)
 	local res = {}
 	for i in M.cut(sentence, all, HMM) do
@@ -241,5 +242,7 @@ M.lcut = function(sentence, all, HMM)
 	end
 	return res
 end
+
+ut.print(M.lcut("我，韩冰,as, 网易杭研大厦", false, true))
 
 return M

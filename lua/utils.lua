@@ -119,10 +119,15 @@ end
 --   end
 --   return blocks
 -- end
-
+-- 不一定全
+function M.is_punctuation(c)
+    local code = utf8.codepoint(c)
+    -- 全角标点符号的 Unicode 范围为：0x3000-0x303F, 0xFF00-0xFFFF
+    return (code >= 0x3000 and code <= 0x303F) or (code >= 0xFF00 and code <= 0xFFFF)
+end
 function M.isChineseCharacter(c)
     local code = utf8.codepoint(c)
-    return code >= 0x4E00 and code <= 0x9FA5
+    return (code >= 0x4E00 and code <= 0x9FA5) --[[ or (code >= 0x3000 and code <= 0x303F) or (code >= 0xFF00 and code <= 0xFFFF) ]]
 end
 
 function M.isAllChinese(sentence)
@@ -130,20 +135,61 @@ function M.isAllChinese(sentence)
    for i in string.gmatch(sentence, "[%z\1-\127\194-\244][\128-\191]*") do
     if not M.isChineseCharacter(i) then
       tmp = tmp and false
-    else 
+    else
       tmp = tmp and true
     end
   end
   return tmp
 end
 
--- 不一定全
-function M.is_punctuation(c)
-    local code = utf8.codepoint(c)
-    -- 全角标点符号的 Unicode 范围为：0x3000-0x303F, 0xFF00-0xFFFF
-    return (code >= 0x3000 and code <= 0x303F) or (code >= 0xFF00 and code <= 0xFFFF)
+-- M.print(M.isAllChinese("，。？！；（）【】"))
+
+function M.splitWithSimilarCharacters(s)
+  local t = {}  -- 创建一个table用来储存分割后的字符
+  local currentString = ""
+  local previousIsChinese = nil
+
+  for i = 1, utf8.len(s) do  -- 迭代整个字符串
+    local c = utf8.sub(s, i, i)  -- 求出第i个字符
+    local isChinese = M.isChineseCharacter(c)  --  判断是否是中文字符
+    
+    if previousIsChinese == nil or isChinese == previousIsChinese then 
+      currentString = currentString .. c
+    else  
+      -- 添加先前的字符串
+      if currentString ~= "" then
+        table.insert(t, currentString)
+        currentString = "" 
+      end
+
+      currentString = c
+    end
+
+    previousIsChinese = isChinese
+  end
+
+  -- 添加最后的字符串（如存在）
+  if currentString ~= "" then
+    table.insert(t, currentString)
+  end
+
+  return t  -- 返回含有所有字符串的table
 end
 
+
+
+function M.splitString(inputString)
+	local result = {}
+	for word in inputString:gmatch("%w+") do
+		table.insert(result, word)
+	end
+	for nonWord in utf8.gmatch(inputString, "%W") do
+		if not (nonWord:match("%w+") and M.isChineseCharacter(nonWord)) then
+			table.insert(result, nonWord)
+		end
+	end
+	return result
+end
 
 function M.split_punctuation(text)
     local result = {}

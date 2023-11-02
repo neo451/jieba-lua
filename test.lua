@@ -16,7 +16,7 @@ print("【全模式】："..tmp)
 
 tmp = ""
 -- 新词识别
-for i in jieba.cut("他来到了网易杭研大厦",true,true) do
+for i in jieba.cut("他来到了网易杭研大厦",false,true) do
   tmp = tmp ..i.." /"
 end
 print("【新词识别】："..tmp)
