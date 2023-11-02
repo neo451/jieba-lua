@@ -2,9 +2,6 @@ local M = {}
 local ut = require("utils")
 local hmm = require("hmm")
 local p = "[%z\1-\127\194-\244][\128-\191]*"
-local function keyInTable(table, key)
-	return table[key] ~= nil
-end
 
 local function script_path()
 	local str = debug.getinfo(2, "S").source:sub(2)
@@ -14,7 +11,6 @@ end
 local default_dict = script_path() .. "dict.txt"
 
 local gen_pfdict = function(file)
-	local starttime = os.clock()
 	local f = io.open(file, "r")
 	local lfreq = {}
 	local ltotal = 0
@@ -35,8 +31,6 @@ local gen_pfdict = function(file)
 		line = f:read()
 	end
 	f:close()
-	local endtime = os.clock()
-	print("loading took " .. endtime - starttime .. " seconds")
 	return lfreq, ltotal
 end
 
@@ -63,7 +57,7 @@ local get_DAG = function(sentence)
 	for k = 1, N do
 		local i = k
 		frag = ut.sub(sentence, k, k)
-		while i <= N and keyInTable(Freq, frag) do
+		while i <= N and ut.keyInTable(Freq, frag) do
 			tmplist[#tmplist + 1] = i
 			i = i + 1
 			frag = ut.sub(sentence, k, i)
@@ -242,7 +236,5 @@ M.lcut = function(sentence, all, HMM)
 	end
 	return res
 end
-
-ut.print(M.lcut("我，韩冰,as, 网易杭研大厦", false, true))
 
 return M
