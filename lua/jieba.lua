@@ -1,5 +1,5 @@
 local M = {}
-local ut = require("utils")
+local ut = require("jb_utils")
 local hmm = require("hmm")
 local p = "[%z\1-\127\194-\244][\128-\191]*"
 
