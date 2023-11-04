@@ -1,14 +1,8 @@
 local M = {}
 local ut = require("jb_utils")
 local hmm = require("hmm")
+local dict = require("dict")
 local p = "[%z\1-\127\194-\244][\128-\191]*"
-
-local function script_path()
-	local str = debug.getinfo(2, "S").source:sub(2)
-	return str:match("(.*/)")
-end
-
-local default_dict = script_path() .. "dict.txt"
 
 local gen_pfdict = function(file)
 	local f = io.open(file, "r")
@@ -34,7 +28,11 @@ local gen_pfdict = function(file)
 	return lfreq, ltotal
 end
 
-local Freq, Total = gen_pfdict(default_dict)
+-- local Freq, Total = gen_pfdict("dict.txt")
+
+local Freq = dict
+local Total = 60101967
+
 if Total == nil then
   print("Empty dict")
 else
