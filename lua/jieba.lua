@@ -28,23 +28,12 @@ local gen_pfdict = function(file)
 	return lfreq, ltotal
 end
 
--- local Freq, Total = gen_pfdict("dict.txt")
+local total = 60101967
 
-local Freq = dict
-local Total = 60101967
+logtotal = math.log(total)
 
-if Total == nil then
-  print("Empty dict")
-else
-  Logtotal = math.log(Total) -- 17.9
-end
-
-if Freq == nil then
-  print("Empty dict")
-else
-  for i, v in pairs(Freq) do
-    Freq[i] = math.log(v) - Logtotal
-  end
+for i, v in pairs(dict) do
+	dict[i] = math.log(v) - logtotal
 end
 
 local get_DAG = function(sentence)
@@ -55,7 +44,7 @@ local get_DAG = function(sentence)
 	for k = 1, N do
 		local i = k
 		frag = ut.sub(sentence, k, k)
-		while i <= N and ut.keyInTable(Freq, frag) do
+		while i <= N and ut.keyInTable(dict, frag) do
 			tmplist[#tmplist + 1] = i
 			i = i + 1
 			frag = ut.sub(sentence, k, i)
@@ -77,7 +66,7 @@ local calc = function(sentence, DAG)
 		local tmp_list = {}
 		for j = 1, #DAG[i] do
 			local x = DAG[i][j]
-			tmp_list[#tmp_list + 1] = { (Freq[ut.sub(sentence, i, x)] or 1) + route[x + 1][1], x }
+			tmp_list[#tmp_list + 1] = { (dict[ut.sub(sentence, i, x)] or 1) + route[x + 1][1], x }
 		end
 		route[i] = ut.max_of_array(tmp_list)
 	end
@@ -146,7 +135,7 @@ local function iter_cut_hmm(sentence)
 				if ut.len(buf) == 1 then
 					coroutine.yield(buf)
 					buf = ""
-				elseif not Freq[buf] then
+				elseif not dict[buf] then
 					local recognized = hmm.cut(buf)
 					for _, t in ipairs(recognized) do
 						coroutine.yield(t)
@@ -167,7 +156,7 @@ local function iter_cut_hmm(sentence)
 	if buf ~= "" then
 		if ut.len(buf) == 1 then
 			coroutine.yield(buf)
-		elseif not Freq[buf] then
+		elseif not dict[buf] then
 			local recognized = hmm.cut(buf)
 			for _, t in ipairs(recognized) do
 				coroutine.yield(t)
@@ -225,7 +214,6 @@ M.cut = function(sentence, all, HMM)
 		return res
 	end
 end
-
 
 M.lcut = function(sentence, all, HMM)
 	local res = {}

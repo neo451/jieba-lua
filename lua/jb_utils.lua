@@ -58,23 +58,6 @@ M.isEng = function (char)
   end
 end
 
-local function dump(o)
-   if type(o) == 'table' then
-      local s = '{ '
-      for k,v in pairs(o) do
-         if type(k) ~= 'number' then k = '"'..k..'"' end
-         s = s .. dump(v) .. '/'
-      end
-      return s .. '} '
-   else
-      return tostring(o)
-  end
-end
-
-M.print = function (o)
-  print(dump(o))
-end
-
 local compare =  function(a,b)
   if a[1] < b[1] then
     return true
@@ -120,27 +103,22 @@ function M.splitWithSimilarCharacters(s)
   for i = 1, utf8.len(s) do  -- 迭代整个字符串
     local c = utf8.sub(s, i, i)  -- 求出第i个字符
     local isChinese = M.isChineseCharacter(c)  --  判断是否是中文字符
-    
-    if previousIsChinese == nil or isChinese == previousIsChinese then 
+    if previousIsChinese == nil or isChinese == previousIsChinese then
       currentString = currentString .. c
-    else  
+    else
       -- 添加先前的字符串
       if currentString ~= "" then
         table.insert(t, currentString)
-        currentString = "" 
+        currentString = ""
       end
-
       currentString = c
     end
-
     previousIsChinese = isChinese
   end
-
   -- 添加最后的字符串（如存在）
   if currentString ~= "" then
     table.insert(t, currentString)
   end
-
   return t  -- 返回含有所有字符串的table
 end
 
