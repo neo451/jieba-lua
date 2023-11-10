@@ -73,30 +73,33 @@ local calc = function(sentence, DAG)
 	return route
 end
 
-local iter_cut_all = function(sentence)
+local cut_all = function(sentence)
 	local DAG = get_DAG(sentence)
 	local old_j = -1
+	local res = {}
 	for k, v in ipairs(DAG) do
 		if #v == 1 and k > old_j then
-			coroutine.yield(ut.sub(sentence, k, v[1]))
+			res[#res + 1] = ut.sub(sentence, k, v[1])
 			old_j = v[1]
 		else
 			for _, j in ipairs(v) do
 				if j > k then
-					coroutine.yield(ut.sub(sentence, k, j))
+					res[#res + 1] = ut.sub(sentence, k, j)
 					old_j = j
 				end
 			end
 		end
 	end
+	return res
 end
 
-local iter_cut_no_hmm = function(sentence)
+local cut_no_hmm = function(sentence)
 	local DAG = get_DAG(sentence)
 	local route = calc(sentence, DAG)
 	local x = 1
 	local N = ut.len(sentence)
 	local buf = ""
+	local res = {}
 	while x <= N do
 		local y = route[x][2]
 		local l_word = ut.sub(sentence, x, y)
@@ -105,26 +108,28 @@ local iter_cut_no_hmm = function(sentence)
 			x = y + 1
 		else
 			if ut.len(buf) > 0 then
-				coroutine.yield(buf)
+				res[#res + 1] = buf
 				buf = ""
 			end
-			coroutine.yield(l_word)
+			res[#res + 1] = l_word
 			x = y + 1
 		end
 	end
 	if ut.len(buf) > 0 then
-		coroutine.yield(buf)
+		res[#res + 1] = buf
 		buf = ""
 		x = x + 1
 	end
+	return res
 end
 
-local function iter_cut_hmm(sentence)
+local function cut_hmm(sentence)
 	local DAG = get_DAG(sentence)
 	local route = calc(sentence, DAG)
 	local x = 1
 	local N = ut.len(sentence)
 	local buf = ""
+	local res = {}
 	while x <= N do
 		local y = route[x][2]
 		local l_word = ut.sub(sentence, x, y)
@@ -133,62 +138,46 @@ local function iter_cut_hmm(sentence)
 		else
 			if buf ~= "" then
 				if ut.len(buf) == 1 then
-					coroutine.yield(buf)
+					res[#res + 1] = buf
 					buf = ""
 				elseif not dict[buf] then
 					local recognized = hmm.cut(buf)
-					for _, t in ipairs(recognized) do
-						coroutine.yield(t)
+					for _, word in ipairs(recognized) do
+						res[#res + 1] = word
 					end
 				else
 					for i = 1, ut.len(buf) do
 						local elem = ut.sub(buf, i, i)
-						coroutine.yield(elem)
+						res[#res + 1] = elem
 					end
 				end
 				buf = ""
 			end
-			coroutine.yield(l_word)
+			res[#res + 1] = l_word
 		end
 		x = y + 1
 	end
 
 	if buf ~= "" then
 		if ut.len(buf) == 1 then
-			coroutine.yield(buf)
+			res[#res + 1] = buf
 		elseif not dict[buf] then
 			local recognized = hmm.cut(buf)
-			for _, t in ipairs(recognized) do
-				coroutine.yield(t)
+			for _, word in ipairs(recognized) do
+				res[#res + 1] = word
 			end
 		else
 			for i = 1, ut.len(buf) do
 				local elem = ut.sub(buf, i, i)
-				coroutine.yield(elem)
+				res[#res + 1] = elem
 			end
 		end
 	end
+	return res
 end
 
-local function cut_hmm(sentence)
-	return coroutine.wrap(function()
-		iter_cut_hmm(sentence)
-	end)
-end
-
-local function cut_no_hmm(sentence)
-	return coroutine.wrap(function()
-		iter_cut_no_hmm(sentence)
-	end)
-end
-
-local function cut_all(sentence)
-	return coroutine.wrap(function()
-		iter_cut_all(sentence)
-	end)
-end
-
-local _cut = function(sentence, all, HMM)
+M.lcut = function(sentence, all, HMM)
+	local res = {}
 	local cutfunc
 	if all then
 		cutfunc = cut_all
@@ -199,28 +188,14 @@ local _cut = function(sentence, all, HMM)
 	end
 	local blocks = ut.splitWithSimilarCharacters(sentence)
 	for _, v in ipairs(blocks) do
-		for i in cutfunc(v) do
-			coroutine.yield(i)
+		local words = cutfunc(v)
+		for _, word in ipairs(words) do
+			res[#res + 1] = word
 		end
-	end
-end
-
-M.cut = function(sentence, all, HMM)
-	local co = coroutine.create(function()
-		_cut(sentence, all, HMM)
-	end)
-	return function()
-		local _, res = coroutine.resume(co)
-		return res
-	end
-end
-
-M.lcut = function(sentence, all, HMM)
-	local res = {}
-	for i in M.cut(sentence, all, HMM) do
-		res[#res + 1] = i
 	end
 	return res
 end
+
+print(vim.inspect(M.lcut("我来到北京清华大学", false, true)))
 
 return M
