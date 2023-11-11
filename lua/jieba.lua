@@ -196,6 +196,8 @@ M.lcut = function(sentence, all, HMM)
 	return res
 end
 
-print(vim.inspect(M.lcut("我来到北京清华大学", false, true)))
+ins = function(t)
+	print(vim.inspect(t))
+end
 
 return M

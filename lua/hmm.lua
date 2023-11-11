@@ -4,6 +4,7 @@ local start = require("prob_start")
 local emit = require("prob_emit")
 local trans = require("prob_trans")
 local ut = require("jb_utils")
+local inspect = require("vim.inspect")
 
 -- add forcesplit
 
@@ -104,6 +105,7 @@ end
 M.lcut = function(sentence)
 	return cut(sentence, start, trans, emit)
 end
+
 -- local Force_Split_Words = {}
 -- function contains(table, val)
 --    for _, value in ipairs(table) do
@@ -120,7 +122,7 @@ function M.cut(sentence)
 	for _, blk in ipairs(blocks) do
 		if ut.isAllChinese(blk) then
 			local l = M.lcut(blk)
-			for _, word in pairs(l) do
+			for _, word in ipairs(l) do
 				result[#result + 1] = word
 			end
 		else
@@ -131,6 +133,7 @@ function M.cut(sentence)
 	end
 	return result
 end
+
 -- print(vim.inspect(M.cut("韩冰是个")))
 -- local t = os.clock()
 -- for i = 1, 100000 do
