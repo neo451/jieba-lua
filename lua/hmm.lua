@@ -4,10 +4,8 @@ local start = require("prob_start")
 local emit = require("prob_emit")
 local trans = require("prob_trans")
 local ut = require("jb_utils")
-local inspect = require("vim.inspect")
 
 -- add forcesplit
-
 local PrevStatus = {
 	["B"] = { "E", "S" },
 	["M"] = { "M", "B" },
@@ -117,16 +115,16 @@ end
 -- end
 
 function M.cut(sentence)
-	local blocks = ut.splitWithSimilarCharacters(sentence)
+	local blocks = ut.split_similar_char(sentence)
 	local result = {}
 	for _, blk in ipairs(blocks) do
-		if ut.isAllChinese(blk) then
+		if ut.is_chinese(blk) then
 			local l = M.lcut(blk)
 			for _, word in ipairs(l) do
 				result[#result + 1] = word
 			end
 		else
-			for _, word in ipairs(ut.splitString(blk)) do
+			for _, word in ipairs(ut.split_string(blk)) do
 				result[#result + 1] = word
 			end
 		end

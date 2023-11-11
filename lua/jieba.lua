@@ -44,7 +44,7 @@ local get_DAG = function(sentence)
 	for k = 1, N do
 		local i = k
 		frag = ut.sub(sentence, k, k)
-		while i <= N and ut.keyInTable(dict, frag) do
+		while i <= N and ut.key_in_table(dict, frag) do
 			tmplist[#tmplist + 1] = i
 			i = i + 1
 			frag = ut.sub(sentence, k, i)
@@ -103,7 +103,7 @@ local cut_no_hmm = function(sentence)
 	while x <= N do
 		local y = route[x][2]
 		local l_word = ut.sub(sentence, x, y)
-		if ut.len(l_word) == 1 and ut.isEng(l_word) then
+		if ut.len(l_word) == 1 and ut.is_eng(l_word) then
 			buf = buf .. l_word
 			x = y + 1
 		else
@@ -186,7 +186,7 @@ M.lcut = function(sentence, all, HMM)
 	else
 		cutfunc = cut_no_hmm
 	end
-	local blocks = ut.splitWithSimilarCharacters(sentence)
+	local blocks = ut.split_similar_char(sentence)
 	for _, v in ipairs(blocks) do
 		local words = cutfunc(v)
 		for _, word in ipairs(words) do
@@ -194,10 +194,6 @@ M.lcut = function(sentence, all, HMM)
 		end
 	end
 	return res
-end
-
-ins = function(t)
-	print(vim.inspect(t))
 end
 
 return M

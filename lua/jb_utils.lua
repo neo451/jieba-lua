@@ -1,7 +1,7 @@
 local M = {}
 local utf8 = require("lua-utf8")
 
-M.keyInTable = function(table, key)
+M.key_in_table = function(table, key)
 	return table[key] ~= nil
 end
 -- 判断utf8字符byte长度
@@ -50,7 +50,7 @@ M.len = function(str)
 	return len
 end
 
-M.isEng = function(char)
+M.is_eng = function(char)
 	if string.find(char, "[a-zA-Z0-9]") then
 		return true
 	else
@@ -78,15 +78,15 @@ function M.is_punctuation(c)
 	return (code >= 0x3000 and code <= 0x303F) or (code >= 0xFF00 and code <= 0xFFFF)
 end
 
-function M.isChineseCharacter(c)
+function M.is_chinese_char(c)
 	local code = utf8.codepoint(c)
 	return (code >= 0x4E00 and code <= 0x9FA5)
 end
 
-function M.isAllChinese(sentence)
+function M.is_chinese(sentence)
 	local tmp = true
 	for i in string.gmatch(sentence, "[%z\1-\127\194-\244][\128-\191]*") do
-		if not M.isChineseCharacter(i) then
+		if not M.is_chinese_char(i) then
 			tmp = tmp and false
 		else
 			tmp = tmp and true
@@ -95,14 +95,14 @@ function M.isAllChinese(sentence)
 	return tmp
 end
 
-function M.splitWithSimilarCharacters(s)
+function M.split_similar_char(s)
 	local t = {} -- 创建一个table用来储存分割后的字符
 	local currentString = ""
 	local previousIsChinese = nil
 
 	for i = 1, utf8.len(s) do -- 迭代整个字符串
 		local c = utf8.sub(s, i, i) -- 求出第i个字符
-		local isChinese = M.isChineseCharacter(c) --  判断是否是中文字符
+		local isChinese = M.is_chinese_char(c) --  判断是否是中文字符
 		if previousIsChinese == nil or isChinese == previousIsChinese then
 			currentString = currentString .. c
 		else
@@ -122,20 +122,7 @@ function M.splitWithSimilarCharacters(s)
 	return t -- 返回含有所有字符串的table
 end
 
--- function M.splitString(inputString)
--- 	local result = {}
--- 	for word in inputString:gmatch("%w+") do
--- 		table.insert(result, word)
--- 	end
--- 	for nonWord in utf8.gmatch(inputString, "%W") do
--- 		if not (nonWord:match("%w+") and M.isChineseCharacter(nonWord)) then
--- 			table.insert(result, nonWord)
--- 		end
--- 	end
--- 	return result
--- end
-
-function M.splitString(inputString)
+function M.split_string(inputString)
 	local result = {}
 	local currentIndex = 1
 
@@ -158,7 +145,5 @@ function M.splitString(inputString)
 
 	return result
 end
-
-print(vim.inspect(M.splitString("parse = table")))
 
 return M
