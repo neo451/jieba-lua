@@ -196,4 +196,6 @@ M.lcut = function(sentence, all, HMM)
 	return res
 end
 
+-- print(vim.inspect(M.lcut(" 一个对应不同观念的不同符号构成的系统韩冰sd", false, true)))
+
 return M
