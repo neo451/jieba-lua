@@ -3,26 +3,25 @@ local utf8 = require("lua-utf8")
 
 local lpeg = require("lpeg")
 
-local spaces = lpeg.C(lpeg.S(" \t\n")^1)
+local spaces = lpeg.C(lpeg.S(" \t\n") ^ 1)
 local hans = lpeg.C(lpeg.utfR(0x4E00, 0x9FFF) ^ 1) -- 0x9FA5?
-local han = lpeg.C(lpeg.utfR(0x4E00, 0x9FFF)) -- 0x9FA5?
 local engs = lpeg.C(lpeg.R("az", "AZ") ^ 1)
-local eng = lpeg.C(lpeg.R("az", "AZ"))
-local half_punc = lpeg.C(lpeg.S(".,;!?()[]{}+-=_!@#$%^&*~`'\"<>:|\\") )
+local half_punc = lpeg.C(lpeg.S("·.,;!?()[]{}+-=_!@#$%^&*~`'\"<>:|\\"))
 local nums = lpeg.C(lpeg.R("09") ^ 1)
-local num = lpeg.C(lpeg.R("09"))
-local full_punc = lpeg.C(lpeg.utfR(0x3000, 0x303F) + lpeg.utfR(0xFF00, 0xFFFF))
+local full_punc = lpeg.C(lpeg.utfR(0x3000, 0x303F) + lpeg.utfR(0xFF01, 0xFF5E) + lpeg.utfR(0x2000, 0x206F)) -- 0xFF01 to 0xFF5E
 
 local p_str = lpeg.Ct((hans + engs + half_punc + full_punc + nums + spaces) ^ 0)
-local p_char = lpeg.Ct((han + eng + half_punc + full_punc + num + spaces) ^ 0)
+local unicode = lpeg.Ct(lpeg.C(lpeg.utfR(0x0000, 0xFFFF)) ^ 1)
 
 function M.split_string(str)
-	return p_str:match(str)
+	return p_str:match(str) or {}
 end
 
 function M.split_char(str)
-	return p_char:match(str)
+	return unicode:match(str) or {}
 end
+
+-- print(vim.inspect(M.split_char("")))
 
 M.key_in_table = function(table, key)
 	return table[key] ~= nil

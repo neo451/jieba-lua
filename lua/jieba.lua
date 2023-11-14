@@ -40,9 +40,12 @@ local get_DAG = function(sentence)
 	local DAG = {}
 	local tmplist = {}
 	local N = ut.len(sentence)
+  -- local tab = ut.split_char(sentence)
+  -- local N = #tab
 	local frag = ""
 	for k = 1, N do
 		local i = k
+    -- frag = tab[k]
 		frag = ut.sub(sentence, k, k)
 		while i <= N and ut.key_in_table(dict, frag) do
 			tmplist[#tmplist + 1] = i
@@ -196,6 +199,6 @@ M.lcut = function(sentence, all, HMM)
 	return res
 end
 
--- print(vim.inspect(M.lcut(" 一个对应不同观念的不同符号构成的系统韩冰sd", false, true)))
+-- print(vim.inspect(M.lcut("   - 人类与生俱来的东西不是口头言语，而是语言的机能 -》一个对应不同观念的不同符号构成的系统", false, true)))
 
 return M
