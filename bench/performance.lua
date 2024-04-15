@@ -1,4 +1,4 @@
-local jieba = require("jieba")
+local jieba = require("lua.jieba.jieba")
 local profile = require("profile")
 local t = {}
 for line in io.lines("weicheng.txt") do

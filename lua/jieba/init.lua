@@ -9,7 +9,6 @@ local gen_pfdict = function(file)
 	local lfreq = {}
 	local ltotal = 0
 	if f == nil then
-		print("file not found")
 		return
 	end
 	local line = f:read()
@@ -28,7 +27,7 @@ local gen_pfdict = function(file)
 	return lfreq, ltotal
 end
 
-local dict = gen_pfdict("dict/dict.txt")
+local dict = gen_pfdict("dict/dict.txt") or require("jieba.dict")
 
 local total = 60101967
 

@@ -1,4 +1,4 @@
-local jieba = require("jieba")
+local jieba = require("lua.jieba.jieba")
 require("moon.all")
 
 p(jieba.lcut("我来到北京人民大学", false, false))

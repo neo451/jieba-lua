@@ -13,14 +13,23 @@ local nums = lpeg.C(lpeg.R("09") ^ 1)
 local full_punc = lpeg.C(lpeg.utfR(0x3000, 0x303F) + lpeg.utfR(0xFF01, 0xFF5E) + lpeg.utfR(0x2000, 0x206F)) -- 0xFF01 to 0xFF5E
 
 local p_str = lpeg.Ct((hans + engs + half_punc + full_punc + nums + spaces) ^ 0)
-local unicode = lpeg.Ct(lpeg.C(lpeg.utfR(0x0000, 0xFFFF)) ^ 1)
 
 function M.split_string(str)
 	return p_str:match(str) or {}
 end
 
+-- function M.split_char(str)
+-- 	return unicode:match(str) or {}
+-- end
+
 function M.split_char(str)
-	return unicode:match(str) or {}
+	local res = {}
+	local p = "[%z\1-\127\194-\244][\128-\191]*"
+
+	for ch in string.gmatch(str, p) do
+		table.insert(res, ch)
+	end
+	return res
 end
 
 local chsize = function(char)
