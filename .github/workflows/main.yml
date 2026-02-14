@@ -31,6 +31,7 @@ jobs:
           extra_luarocks_args: |
             --force
           version: scm
+          name: jieba
           template: jieba-scm-1.rockspec
       - uses: lumen-oss/luarocks-tag-release@v7
         env:
@@ -39,4 +40,5 @@ jobs:
         with:
           extra_luarocks_args: |
             --force
+          name: jieba
           template: jieba-scm-1.rockspec
