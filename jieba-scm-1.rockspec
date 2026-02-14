@@ -45,5 +45,6 @@ if modrev == 'scm' or modrev == 'dev' then
 end
 
 build = {
-   type = "builtin",
+  type = "builtin",
+  copy_directories = { 'plugin' },
 }
