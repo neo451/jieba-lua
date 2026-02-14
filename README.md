@@ -41,7 +41,7 @@
 #### Command style
 
 ```vim
-:Rocks install jieba-lua
+:Rocks install jieba
 ```
 
 #### Declare style
@@ -50,7 +50,7 @@
 
 ```toml
 [plugins]
-"jieba-lua" = "scm"
+"jieba" = "scm"
 ```
 
 Then
@@ -62,7 +62,7 @@ Then
 or:
 
 ```sh
-$ luarocks --lua-version 5.1 --local --tree ~/.local/share/nvim/rocks install jieba-lua
+$ luarocks --lua-version 5.1 --local --tree ~/.local/share/nvim/rocks install jieba
 # ~/.local/share/nvim/rocks is the default rocks tree path
 # you can change it according to your vim.g.rocks_nvim.rocks_path
 ```
