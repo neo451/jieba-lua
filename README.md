@@ -1,15 +1,50 @@
 # jieba-lua
 
-结巴分词lua版，结巴分词 是由 @fxsjy 使用 Python 编写的中文分词组件，jieba-lua 是结巴分词的 lua 语言实现。
+基于结巴中文分词的单词跳转。结巴分词是由 @fxsjy 使用 Python 编写的中文分词组件，jieba-lua 是结巴分词的 lua 语言实现。比原版 jieba 快, 但并不会比采用 cppjieba 的 [jieba.nvim](https://github.com/neo451/jieba.nvim) 快, 不过完全够用, 且不需要本地编译，插件逻辑来自[jieba.vim](https://github.com/kkew3/jieba.vim)
 
-基于结巴中文分词的单词跳转，基于[jieba-lua](https://github.com/noearc/jieba-lua), 好处是比原版 jieba 快, 但并不会比采用 cppjieba 的 [jieba.nvim](https://github.com/neo451/jieba.nvim) 快, 不过完全够用, 且不需要本地编译，插件逻辑来自[jieba.vim](https://github.com/kkew3/jieba.vim)
+[相关项目](https://github.com/neo451/jieba.nvim#related-projects)
 
 ## 安装
 
-lazy.nvim:
+### rocks.nvim
+
+#### Command style
+
+```vim
+:Rocks install jieba-lua
+```
+
+#### Declare style
+
+`~/.config/nvim/rocks.toml`:
+
+```toml
+[plugins]
+"jieba-lua" = "scm"
+```
+
+Then
+
+```vim
+:Rocks sync
+```
+
+or:
+
+```sh
+$ luarocks --lua-version 5.1 --local --tree ~/.local/share/nvim/rocks install jieba-lua
+# ~/.local/share/nvim/rocks is the default rocks tree path
+# you can change it according to your vim.g.rocks_nvim.rocks_path
+```
+
+### lazy.nvim
 
 ```lua
-{'noearc/jieba-lua', opts = {} },
+require("lazy").setup {
+  spec = {
+    { "neo451/jieba-lua", lazy = false },
+  },
+}
 ```
 
 ## 设置
@@ -38,7 +73,7 @@ vim.keymap.set('n', '<leader>w' , ":lua require'jieba_nvim'.select_w()<CR>", {no
 ## 使用
 
 ``` lua
-local jieba = require("jieba")
+local jieba = require("jieba.core")
 
 -- 精确模式
 local tmp = ""
