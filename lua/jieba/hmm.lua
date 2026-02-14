@@ -1,8 +1,8 @@
 local M = {}
 local MIN_FLOAT = -3.14e100
-local start = require("jieba.prob_start")
-local emit = require("jieba.prob_emit")
-local trans = require("jieba.prob_trans")
+local start = require("jieba.prob.start")
+local emit = require("jieba.prob.emit")
+local trans = require("jieba.prob.trans")
 local ut = require("jieba.utils")
 
 -- add forcesplit
