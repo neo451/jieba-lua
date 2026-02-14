@@ -25,3 +25,4 @@ vim = " >= 0.0.1"
 
 [build]
 type = "builtin"
+copy_directories = ['plugin']
