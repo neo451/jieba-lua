@@ -47,11 +47,11 @@ local get_DAG = function(sentence)
    for k = 1, N do
       local i = k
       -- frag = tab[k]
-      frag = ut.sub(sentence, k, k)
+      frag = utf8.sub(sentence, k, k)
       while i <= N and dict[frag] do
          tmplist[#tmplist + 1] = i
          i = i + 1
-         frag = ut.sub(sentence, k, i)
+         frag = utf8.sub(sentence, k, i)
       end
       if #tmplist == 0 then
          tmplist[#tmplist + 1] = k
@@ -70,7 +70,7 @@ local calc = function(sentence, DAG)
       local tmp_list = {}
       for j = 1, #DAG[i] do
          local x = DAG[i][j]
-         tmp_list[#tmp_list + 1] = { (dict[ut.sub(sentence, i, x)] or 1) + route[x + 1][1], x }
+         tmp_list[#tmp_list + 1] = { (dict[utf8.sub(sentence, i, x)] or 1) + route[x + 1][1], x }
       end
       route[i] = ut.max_of_array(tmp_list)
    end
@@ -83,12 +83,12 @@ local cut_all = function(sentence)
    local res = {}
    for k, v in ipairs(DAG) do
       if #v == 1 and k > old_j then
-         res[#res + 1] = ut.sub(sentence, k, v[1])
+         res[#res + 1] = utf8.sub(sentence, k, v[1])
          old_j = v[1]
       else
          for _, j in ipairs(v) do
             if j > k then
-               res[#res + 1] = ut.sub(sentence, k, j)
+               res[#res + 1] = utf8.sub(sentence, k, j)
                old_j = j
             end
          end
@@ -142,7 +142,7 @@ local cut_no_hmm = function(sentence)
    local res = {}
    while x <= N do
       local y = route[x][2]
-      local l_word = ut.sub(sentence, x, y)
+      local l_word = utf8.sub(sentence, x, y)
       if utf8.len(l_word) == 1 and ut.is_eng(l_word) then
          buf = buf .. l_word
          x = y + 1
@@ -172,7 +172,7 @@ local function cut_hmm(sentence)
    local res = {}
    while x <= N do
       local y = route[x][2]
-      local l_word = ut.sub(sentence, x, y)
+      local l_word = utf8.sub(sentence, x, y)
       if y == x then
          buf = buf .. l_word
       else
@@ -187,7 +187,7 @@ local function cut_hmm(sentence)
                end
             else
                for i = 1, utf8.len(buf) do
-                  local elem = ut.sub(buf, i, i)
+                  local elem = utf8.sub(buf, i, i)
                   res[#res + 1] = elem
                end
             end
@@ -208,7 +208,7 @@ local function cut_hmm(sentence)
          end
       else
          for i = 1, utf8.len(buf) do
-            local elem = ut.sub(buf, i, i)
+            local elem = utf8.sub(buf, i, i)
             res[#res + 1] = elem
          end
       end

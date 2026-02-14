@@ -1,6 +1,6 @@
 local M = {}
 local utf8 = require("utf8")
-local lpeg = vim and vim.lpeg or require("lpeg")
+local lpeg = require("lpeg")
 
 local spaces = lpeg.C(lpeg.S(" \t\n") ^ 1)
 local hans = lpeg.C(lpeg.utfR(0x4E00, 0x9FFF) ^ 1) -- 0x9FA5?
@@ -23,39 +23,6 @@ function M.split_char(str)
       table.insert(res, ch)
    end
    return res
-end
-
-local chsize = function(char)
-   if not char then
-      return 0
-   elseif char > 240 then
-      return 4
-   elseif char > 225 then
-      return 3
-   elseif char > 192 then
-      return 2
-   else
-      return 1
-   end
-end
-
-M.sub = function(str, startChar, endChar)
-   local startIndex = 1
-   local numChars = endChar - startChar + 1
-   while startChar > 1 do
-      local char = string.byte(str, startIndex)
-      startIndex = startIndex + chsize(char)
-      startChar = startChar - 1
-   end
-
-   local currentIndex = startIndex
-
-   while numChars > 0 and currentIndex <= #str do
-      local char = string.byte(str, currentIndex)
-      currentIndex = currentIndex + chsize(char)
-      numChars = numChars - 1
-   end
-   return str:sub(startIndex, currentIndex - 1), numChars
 end
 
 M.is_eng = function(char)
@@ -109,8 +76,7 @@ function M.split_similar_char(s)
    local previousIsChinese = nil
 
    for i = 1, utf8.len(s) do -- 迭代整个字符串
-      -- local c = utf8.sub(s, i, i) -- 求出第i个字符
-      local c = M.sub(s, i, i) -- 求出第i个字符
+      local c = utf8.sub(s, i, i) -- 求出第i个字符
       local isChinese = M.is_chinese_char(c) --  判断是否是中文字符
       if previousIsChinese == nil or isChinese == previousIsChinese then
          currentString = currentString .. c
