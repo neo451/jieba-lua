@@ -7,12 +7,12 @@ summary = "simulate vim's word motion"
 detailed = ""
 maintainer = "Wu"
 labels = ["neovim"]
-homepage = "https://github.com/neo451/jieba.nvim/tree/main/packages/wordmotion.nvim"
+homepage = "https://github.com/neo451/jieba-lua/tree/master/packages/wordmotion.nvim"
 license = 'GPL-3.0'
 
 [source]
-url = "https://github.com/neo451/jieba.nvim/archive/$(VERSION).zip"
-dir = "jieba.nvim-$(VERSION)/packages/$(PACKAGE)"
+url = "https://github.com/neo451/jieba-lua/archive/$(VERSION).zip"
+dir = "jieba-lua-$(VERSION)/packages/$(PACKAGE)"
 
 [dependencies]
 utf8 = " >= 0.0.1"
