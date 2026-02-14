@@ -1,7 +1,6 @@
 local M = {}
--- local utf8 = require("lua-utf8")
-local utf8 = require("jieba.utf8")
-local lpeg = require("lpeg") or vim.lpeg
+local utf8 = require("utf8")
+local lpeg = vim and vim.lpeg or require("lpeg")
 
 local spaces = lpeg.C(lpeg.S(" \t\n") ^ 1)
 local hans = lpeg.C(lpeg.utfR(0x4E00, 0x9FFF) ^ 1) -- 0x9FA5?

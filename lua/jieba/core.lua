@@ -1,6 +1,6 @@
 local M = {}
 local ut = require("jieba.utils")
-local utf8 = require("jieba.utf8")
+local utf8 = require("utf8")
 local hmm = require("jieba.hmm")
 local p = "[%z\1-\127\194-\244][\128-\191]*"
 
