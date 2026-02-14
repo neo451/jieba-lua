@@ -216,7 +216,7 @@ local function cut_hmm(sentence)
    return res
 end
 
-M.lcut = function(sentence, all, HMM)
+M.cut = function(sentence, all, HMM)
    local res = {}
    local cutfunc
    if all then

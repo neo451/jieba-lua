@@ -21,13 +21,14 @@ description = {
   detailed = [[
       Chinse word segmentation library for Lua, based on the original python implementation.
    ]],
-  homepage = "https://github.com/noearc/jieba-lua",
+  homepage = "https://github.com/neo451/jieba-lua",
   license = "MIT",
 }
 
 dependencies = {
    "lua >= 5.1",
    "lpeg >= 1.1.0-1",
+   "wordmotion.nvim",
 }
 
 test_dependencies = {}
