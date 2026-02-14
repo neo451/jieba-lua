@@ -7,3 +7,4 @@ vim.schedule(
     end
 )
 require 'wordmotion.nvim.jieba'.set_keymaps()
+-- require 'wordmotion.nvim.sentence'.set_keymaps()
