@@ -1,6 +1,6 @@
 ---simulate b/e/w/ge, support Chinese token
 -- luacheck: ignore 111 113
-local Motion = require "wordmotion".Motion
+local Motion = require "wordmotion.sentence".Motion
 local M = {
     backends = {
         "rjieba.jieba",
@@ -38,21 +38,9 @@ setmetatable(M.Motion, {
 
 ---cut string to get **non-empty** words: `utf8.offset("", -1) == nil`
 ---@param str string
----@return {text: string, illegal: boolean?, start_index: integer, end_index: integer}[]
-function M.Motion:get_tokens(str)
-    local tokens = {}
-    local c = 0
-    for _, text in ipairs(self.jieba:cut(str)) do
-        table.insert(tokens,
-            {
-                text = text,
-                illegal = text:match "%s*" == text,
-                start_index = c,
-                end_index = c + utf8.offset(text, -1) - 1
-            })
-        c = c + #text
-    end
-    return tokens
+---@return string[]
+function M.Motion:cut(str)
+    return self.jieba:cut(str)
 end
 
 return M
