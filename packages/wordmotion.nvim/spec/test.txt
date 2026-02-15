@@ -1,4 +1,4 @@
 hello, world!
 你好，世界！
+Hello! Chinese!　你好！中国人！
 こんにちわ，世界！
-Hello! The world! 你好！世界！

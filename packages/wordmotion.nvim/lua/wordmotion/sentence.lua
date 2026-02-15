@@ -3,10 +3,6 @@
 local Motion = require "wordmotion".Motion
 local utf8 = require("utf8")
 local M = {
-    punctuations = {
-        en = { ".", "!", "?" },
-        zh = { "。", "！", "?" },
-    },
     Motion = {
     }
 }
@@ -46,12 +42,36 @@ function M.Motion:get_tokens(str)
     return tokens
 end
 
----TODO:
 ---cut string by punctuations
 ---@param str string
 ---@return string[]
 function M.Motion:cut(str)
-    return {}
+    local sentences = {}
+    local last_match
+    for match in utf8.gmatch(str, "[^。！？….!?]*[。！？….!?]") do
+        last_match = self.insert(sentences, last_match, match)
+    end
+    local match = utf8.match(str, "[^。！？….!?]+$")
+    last_match = self.insert(sentences, last_match, match)
+    table.insert(sentences, last_match)
+    return sentences
+end
+
+---insert last match to matches if current match is capital
+---@param matches string[]
+---@param last_match string?
+---@param match string?
+---@return string? last_match
+function M.Motion.insert(matches, last_match, match)
+    local letter = utf8.sub(match or "", 1, 1)
+    -- ignore e.g., etc., ...
+    if utf8.upper(letter) ~= letter then
+        return (last_match or "") .. match
+    end
+    last_match = last_match or ""
+    table.insert(matches, utf8.match(last_match, "^%s+"))
+    table.insert(matches, utf8.match(last_match, "%S.*"))
+    return match
 end
 
 return M

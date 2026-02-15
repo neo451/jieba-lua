@@ -33,3 +33,39 @@ pos = motion:get_position(-1, true, pos)
 pos = motion:get_position(1, false, pos)
 -- 你|好，世界！
 ```
+
+Except `w/b/e/ge`, we also provide `(/)/g(/g)`.
+You can install this plugin to get it!
+
+## Install
+
+### rocks.nvim
+
+#### Command style
+
+```vim
+:Rocks install wordmotion.nvim
+```
+
+#### Declare style
+
+`~/.config/nvim/rocks.toml`:
+
+```toml
+[plugins]
+"wordmotion.nvim" = "scm"
+```
+
+Then
+
+```vim
+:Rocks sync
+```
+
+or:
+
+```sh
+$ luarocks --lua-version 5.1 --local --tree ~/.local/share/nvim/rocks install wordmotion.nvim
+# ~/.local/share/nvim/rocks is the default rocks tree path
+# you can change it according to your vim.g.rocks_nvim.rocks_path
+```

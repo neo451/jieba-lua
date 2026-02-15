@@ -10,7 +10,9 @@ function M.set_keymaps(keymaps, callback)
     for lhs, keymap in pairs(keymaps) do
         local modes = keymap[1]
         local args = keymap[2]
-        vim.keymap.set(modes, lhs, callback(args), { noremap = true })
+        vim.keymap.set(modes, lhs, function()
+            callback(args)
+        end, { noremap = true })
     end
 end
 
