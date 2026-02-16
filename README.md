@@ -119,4 +119,5 @@ print("【新词识别】："..tmp)
 ```
 
 ## 性能
-- 待测试
+
+[lua-profile](https://github.com/neo451/jieba-lua/blob/master/packages/lua-profile)

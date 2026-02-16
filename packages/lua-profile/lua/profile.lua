@@ -169,13 +169,13 @@ function profile.report(n)
     out[i] = table.concat(row, ' | ')
   end
 
-  local row = " +-----+-------------------------------+-------------+--------------------------+----------------------------------+ \n"
+  local row = " |-----|-------------------------------|-------------|--------------------------|----------------------------------| \n"
   local col = " | #   | Function                      | Calls       | Time                     | Code                             | \n"
-  local sz = row..col..row
+  local sz = col..row
   if #out > 0 then
     sz = sz..' | '..table.concat(out, ' | \n | ')..' | \n'
   end
-  return '\n'..sz..row
+  return '\n'..sz
 end
 
 -- store all internal profiler functions
