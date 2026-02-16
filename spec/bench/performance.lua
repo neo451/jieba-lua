@@ -40,7 +40,7 @@ for _, datum in ipairs(data) do
 end
 
 for _, datum in ipairs(data) do
-	print(("%s: %f"):format(datum.name, datum.time))
+	print(("%s: %f s"):format(datum.name, datum.time))
 	print(datum.report)
 end
 

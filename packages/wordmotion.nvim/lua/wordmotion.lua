@@ -161,22 +161,39 @@ function M.Motion:get_position(count, begin, cursor)
     return pos
 end
 
----move cursor
+---displace cursor
 ---@param begin boolean jump to token's begin: b/w
 ---@param count integer?
-function M.Motion:move(begin, count)
+function M.Motion:displace(begin, count)
     count = count or vim.v.count1
     local cursor = vim.api.nvim_win_get_cursor(0)
     local pos = self:get_position(count, begin, cursor)
     vim.api.nvim_win_set_cursor(0, pos)
 end
 
----callback for `vim.keymap.set()`
+---move by text object
 ---@param begin boolean jump to token's begin: b/w
 ---@param forward boolean
-function M.Motion:callback(begin, forward)
-    return function()
-        self:move(begin, vim.v.count1 * (forward and 1 or -1))
+function M.Motion:move(begin, forward)
+    self:displace(begin, vim.v.count1 * (forward and 1 or -1))
+end
+
+---select text object
+---@param around boolean iw/aw
+function M.Motion:select(around)
+    self:displace(true, -1)
+    vim.cmd[[normal! o]]
+    self:displace(around, vim.v.count1)
+end
+
+---select or move
+---@param around boolean iw/aw
+---@param forward boolean?
+function M.Motion:keymap(around, forward)
+    if forward == nil then
+        self:select(around)
+    else
+        self:move(around, forward)
     end
 end
 

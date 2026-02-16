@@ -6,6 +6,8 @@ local M = {
         b = { { "n", "x" }, { true, false } },
         e = { { "n", "x" }, { false, true } },
         ge = { { "n", "x" }, { false, false } },
+        iw = { { "x" }, { false } },
+        aw = { { "x" }, { true } },
     }
 }
 
@@ -23,7 +25,7 @@ function M.set_keymaps(keymaps)
     keymaps = keymaps or M.keymaps
     set_keymaps(keymaps, function(args)
         M.init()
-        M.motion:callback(args[1], args[2])()
+        M.motion:keymap(args[1], args[2])
     end)
 end
 
