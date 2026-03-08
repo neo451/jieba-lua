@@ -1,5 +1,5 @@
 ---wrap `require'rjieba'.Jieba`
-local Jieba = require 'rjieba'.jieba
+local Jieba = require 'rjieba'.Jieba
 local M = {
     Jieba = {
         --- if hmm is enabled

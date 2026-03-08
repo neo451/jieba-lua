@@ -1,18 +1,18 @@
-package.path = package.path .. ';lua/?.lua;packages/lua-profile/lua/?.lua'
+package.path = package.path .. ';lua/?.lua;packages/lua-profile/lua/?.lua;packages/rjieba/lua/?.lua'
 
 local profile = require("profile")
 local data = {
 	{
-		name = "rjieba",
-		jieba = require("rjieba").Jieba()
+		name = "cppjieba",
+		jieba = require("cppjieba.jieba").Jieba()
 	},
 	{
-		name = "jieba.nvim",
-		jieba = require("jieba.jieba").Jieba()
+		name = "rjieba",
+		jieba = require("rjieba.jieba").Jieba()
 	},
 	{
 		name = "jieba-lua",
-		jieba = require("jieba.jieba-lua").Jieba()
+		jieba = require("jieba.jieba").Jieba()
 	}
 }
 local fs = require 'vim.fs'
