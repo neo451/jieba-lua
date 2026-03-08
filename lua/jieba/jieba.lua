@@ -1,5 +1,5 @@
----wrap `require'jieba'.Jieba`
-local cut = require 'jieba.core'.cut
+---wrap `require'jieba'.cut`
+local cut = require 'jieba'.cut
 local M = {
     Jieba = {
         --- if hmm is enabled

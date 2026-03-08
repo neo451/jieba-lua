@@ -84,7 +84,7 @@ require("lazy").setup {
 ## 使用
 
 ``` lua
-local jieba = require("jieba.core")
+local jieba = require("jieba")
 
 -- 精确模式
 local tmp = ""

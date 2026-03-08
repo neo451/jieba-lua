@@ -3,9 +3,9 @@
 local Motion = require "wordmotion.sentence".Motion
 local M = {
     backends = {
-        "rjieba",
+        "rjieba.jieba",
+        "cppjieba.jieba",
         "jieba.jieba",
-        "jieba.jieba-lua",
     },
     Motion = {
     }
