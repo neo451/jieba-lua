@@ -1,9 +1,20 @@
 package.path = package.path .. ';lua/?.lua;packages/lua-profile/lua/?.lua'
 
-local luajieba = require("jieba.jieba-lua").Jieba()
-local cppjieba = require("jieba.jieba").Jieba()
-local rjieba = require("rjieba").Jieba()
 local profile = require("profile")
+local data = {
+	{
+		name = "rjieba",
+		jieba = require("rjieba").Jieba()
+	},
+	{
+		name = "jieba.nvim",
+		jieba = require("jieba.jieba").Jieba()
+	},
+	{
+		name = "jieba-lua",
+		jieba = require("jieba.jieba-lua").Jieba()
+	}
+}
 local fs = require 'vim.fs'
 local t = {}
 local file = fs.joinpath(
@@ -13,21 +24,6 @@ local file = fs.joinpath(
 for line in io.lines(file) do
 	t[#t + 1] = line
 end
-
-local data = {
-	{
-		name = "rjieba",
-		jieba = rjieba
-	},
-	{
-		name = "jieba.nvim",
-		jieba = cppjieba
-	},
-	{
-		name = "jieba-lua",
-		jieba = luajieba
-	}
-}
 
 for _, datum in ipairs(data) do
 	profile.start()
