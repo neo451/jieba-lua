@@ -1,0 +1,19 @@
+[package]
+name = "rjieba"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+name = "rjieba"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+lua51 = ["mlua/lua51"]
+lua52 = ["mlua/lua52"]
+lua53 = ["mlua/lua53"]
+lua54 = ["mlua/lua54"]
+luajit = ["mlua/luajit"]
+
+[dependencies]
+mlua = { version = "0.11.2", features = ["module", "serialize"] }
+jieba-rs = "0.8"

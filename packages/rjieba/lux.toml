@@ -1,0 +1,28 @@
+package = "rjieba"
+version = "0.0.1"
+lua = ">= 5.1"
+
+[description]
+summary = "lua binding for jieba-rs"
+detailed = ""
+maintainer = "Wu"
+labels = ["neovim"]
+homepage = "https://github.com/neo451/jieba-lua/tree/master/packages/rjieba"
+license = 'MIT'
+
+[source]
+url = "https://github.com/neo451/jieba-lua/archive/$(VERSION).zip"
+dir = "rjieba-$(VERSION)/packages/$(PACKAGE)"
+
+[dependencies]
+"wordmotion.nvim" = " >= 0.0.1"
+
+[test]
+type = "busted"
+
+[build]
+type = "rust-mlua"
+copy_directories = ['plugin']
+
+[build.modules]
+rjieba = "rjieba"

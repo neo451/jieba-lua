@@ -2,6 +2,7 @@ package.path = package.path .. ';lua/?.lua;packages/lua-profile/lua/?.lua'
 
 local luajieba = require("jieba.jieba-lua").Jieba()
 local cppjieba = require("jieba.jieba").Jieba()
+local rjieba = require("rjieba").Jieba()
 local profile = require("profile")
 local fs = require 'vim.fs'
 local t = {}
@@ -14,6 +15,10 @@ for line in io.lines(file) do
 end
 
 local data = {
+	{
+		name = "rjieba",
+		jieba = rjieba
+	},
 	{
 		name = "jieba.nvim",
 		jieba = cppjieba
