@@ -3,8 +3,8 @@
 local Motion = require "wordmotion.sentence".Motion
 local M = {
     backends = {
-        "rjieba.jieba",
         "cppjieba.jieba",
+        "rjieba.jieba",
         "jieba.jieba",
     },
     Motion = {
