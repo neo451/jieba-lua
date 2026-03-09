@@ -26,3 +26,6 @@ copy_directories = ['plugin', 'scripts']
 
 [build.modules]
 rjieba = "rjieba"
+
+[build.install.lua]
+"rjieba.jieba" = "lua/rjieba/jieba.lua"
