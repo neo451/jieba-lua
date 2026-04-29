@@ -1,3 +1,4 @@
+#!/usr/bin/env lua
 package.path = package.path .. ';lua/?.lua;packages/lua-profile/lua/?.lua;packages/rjieba/lua/?.lua'
 
 local profile = require("profile")
