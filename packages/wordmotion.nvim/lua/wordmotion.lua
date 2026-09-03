@@ -1,9 +1,11 @@
 ---simulate vim's word motion
 ---@module wordmotion
 -- luacheck: ignore 111 113 212
+---@diagnostic disable: undefined-global
 local utf8 = require("utf8")
 local M = {
     Motion = {
+        ---keep at the same line. true for '^$'
         keep = false,
     }
 }
@@ -22,6 +24,8 @@ function M.Motion:new(motion)
     setmetatable(motion, {
         __index = self
     })
+    -- if cannot find legal token, if jump to start or end. false for '^$'
+    motion.jump = motion.jump or not motion.keep
     return motion
 end
 
@@ -100,6 +104,7 @@ end
 ---@param begin boolean jump to token's begin: b/w
 ---@param cursor integer[]
 ---@return integer[] cursor
+---@return boolean? jump
 function M.Motion:get_cursor(count, begin, cursor)
     local l = cursor[1]
     local c = cursor[2]
@@ -136,8 +141,17 @@ function M.Motion:get_cursor(count, begin, cursor)
     end
     l = l + (count > 0 and 1 or -1)
     local l_end = #self:get_lines()
-    if l < 1 or l > l_end then
-        return {}
+    if self.jump then
+        if l < 1 then
+            return { 1, 0 }, true
+        end
+        if l > l_end then
+            return { l_end, #self:get_line(l_end) }, true
+        end
+    else
+        if l < 1 or l > l_end then
+            return {}
+        end
     end
     line = self:get_line(l)
     c = count > 0 and 0 or M.end_index(line)
@@ -148,27 +162,36 @@ end
 ---@param count integer
 ---@param begin boolean jump to token's begin: b/w
 ---@param cursor integer[]
+---@param keep boolean? override self.keep
 ---@return integer[] cursor
-function M.Motion:get_position(count, begin, cursor)
+---@return boolean? jump
+function M.Motion:get_position(count, begin, cursor, keep)
+    if keep == nil then
+        keep = self.keep
+    end
     local pos = cursor
-    if not self.keep then
+    if not keep then
         pos = self:get_character(count > 0, cursor)
     end
-    pos = self:get_cursor(count, begin, pos)
+    local jump
+    pos, jump = self:get_cursor(count, begin, pos)
     if #pos == 0 then
         pos = cursor
     end
-    return pos
+    return pos, jump
 end
 
 ---displace cursor
 ---@param begin boolean jump to token's begin: b/w
 ---@param count integer?
-function M.Motion:displace(begin, count)
+---@param keep boolean? override self.keep
+---@return boolean?
+function M.Motion:displace(begin, count, keep)
     count = count or vim.v.count1
     local cursor = vim.api.nvim_win_get_cursor(0)
-    local pos = self:get_position(count, begin, cursor)
+    local pos, jump = self:get_position(count, begin, cursor, keep)
     vim.api.nvim_win_set_cursor(0, pos)
+    return jump
 end
 
 ---move by text object
@@ -181,9 +204,12 @@ end
 ---select text object
 ---@param around boolean iw/aw
 function M.Motion:select(around)
-    self:displace(true, -1)
-    vim.cmd[[normal! o]]
-    self:displace(around, vim.v.count1)
+    self:displace(true, -1, true)
+    vim.cmd [[normal! o]]
+    local jump = self:displace(around, vim.v.count1, false)
+    if around and not jump then
+        vim.cmd [[normal! h]]
+    end
 end
 
 ---select or move
